@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VS Studio Workspace</title>
+<link rel="icon" href="https://vincenzosalvia.wordpress.com/wp-content/uploads/2026/03/workspace-logo.png">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  @font-face { font-family:'Futura PT'; src:local('Futura PT'),local('Futura Bold'),local('Futura'); }
+  :root {
+    --bg: #020204; --card: rgba(30,30,30,0.9); --card2: #1e1e1e; --card3: #2a2a2a;
+    --cyan: #10BADA; --blue: #267aaa; --pink: #ff7dab;
+    --border: rgba(75,75,85,0.5); --border2: rgba(75,75,85,0.3);
+    --text: #c8c8c8; --text2: #999; --text3: #666; --text4: #444;
+    --heading: #f0eee8;
+    --vincenzo-bg: rgba(42,36,20,0.7); --other-bg: rgba(30,30,30,0.7);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'EB Garamond',Georgia,serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; line-height:1.6; }
+  .title-font { font-family:'Futura PT','Futura Bold',Futura,-apple-system,sans-serif; text-transform:uppercase; letter-spacing:0.05em; }
+  @keyframes spin { to{transform:rotate(360deg);} }
+
+  ::-webkit-scrollbar { width:8px; height:8px; }
+  ::-webkit-scrollbar-track { background:rgba(30,30,30,0.5); border-radius:10px; }
+  ::-webkit-scrollbar-thumb { background:rgba(100,100,100,0.5); border-radius:10px; }
+  ::-webkit-scrollbar-thumb:hover { background:rgba(150,150,150,0.5); }
+
+  .header { padding:10px 16px; border-bottom:1px solid var(--border2); background:rgba(30,30,30,0.95); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+  .header-left { display:flex; align-items:center; gap:10px; }
+  .header-logo { width:38px; height:38px; border-radius:10px; object-fit:cover; border:1px solid var(--border2); }
+  .header-title { font-size:15px; color:var(--heading); letter-spacing:0.06em; }
+  .header-sub { font-size:11px; color:var(--text3); font-family:'EB Garamond',serif; letter-spacing:0.02em; }
+  .header-right { display:flex; gap:5px; align-items:center; }
+  .search-input { background:rgba(42,42,42,0.7); border:1px solid var(--border2); border-radius:10px; padding:5px 10px; color:var(--text); font-size:11px; outline:none; width:120px; font-family:'EB Garamond',serif; transition:all 0.2s; }
+  .search-input:focus { border-color:var(--cyan); box-shadow:0 0 0 2px rgba(16,186,218,0.15); }
+  .btn { background:rgba(42,42,42,0.7); border:1px solid var(--border2); border-radius:10px; padding:5px 8px; color:var(--text3); cursor:pointer; font-size:12px; transition:all 0.2s; line-height:1; }
+  .btn:hover { color:var(--cyan); border-color:var(--cyan); transform:scale(1.05); }
+  .btn.spinning { color:var(--cyan); animation:spin 1s linear infinite; }
+
+  .filters { display:flex; gap:4px; padding:6px 16px; overflow-x:auto; border-bottom:1px solid rgba(30,30,30,0.5); background:rgba(10,10,14,0.95); }
+  .filter-btn { background:transparent; border:1px solid rgba(16,16,20,0.8); border-radius:16px; padding:4px 11px; cursor:pointer; color:var(--text3); font-size:11.5px; white-space:nowrap; transition:all 0.2s; }
+  .filter-btn:hover { border-color:var(--border); }
+  .filter-btn.active { font-weight:700; }
+  .filter-count { margin-left:3px; opacity:0.3; }
+
+  .status { padding:5px 16px; text-align:center; font-size:12px; letter-spacing:0.03em; }
+  .status.sent { background:rgba(16,186,218,0.1); color:var(--cyan); }
+  .status.refreshed { background:rgba(16,186,218,0.08); color:var(--blue); }
+  .status.error { background:rgba(255,125,171,0.08); color:var(--pink); }
+
+  .chat { flex:1; overflow-y:auto; padding:12px 16px; display:flex; flex-direction:column; gap:3px; }
+  .date-sep { text-align:center; margin:14px 0 6px; }
+  .date-label { font-size:11.5px; color:var(--text4); background:rgba(10,10,14,0.9); padding:3px 12px; border-radius:10px; border:1px solid rgba(20,20,28,0.8); }
+
+  .bubble-row { display:flex; gap:10px; align-items:flex-start; max-width:88%; margin-bottom:3px; }
+  .bubble-row.vincenzo { flex-direction:row-reverse; align-self:flex-end; }
+  .bubble-row.other { align-self:flex-start; }
+  .avatar { width:32px; min-width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; }
+  .bubble { padding:9px 13px; max-width:100%; min-width:90px; backdrop-filter:blur(4px); border:1px solid var(--border2); transition:all 0.2s; }
+  .bubble:hover { border-color:var(--border); }
+  .bubble.vincenzo { background:var(--vincenzo-bg); border-radius:14px 3px 14px 14px; }
+  .bubble.other { background:var(--other-bg); border-radius:3px 14px 14px 14px; }
+  .bubble-header { display:flex; align-items:baseline; gap:7px; margin-bottom:3px; flex-wrap:wrap; }
+  .bubble-name { font-weight:700; font-size:13.5px; }
+  .bubble-role { font-size:9.5px; color:var(--text3); text-transform:uppercase; letter-spacing:0.08em; }
+  .bubble-date { font-size:10.5px; color:var(--text4); margin-left:auto; white-space:nowrap; }
+  .bubble-subject { font-size:14px; font-weight:700; color:var(--heading); margin-bottom:6px; padding:4px 9px; border-radius:8px; }
+  .bubble-body { font-size:14.5px; color:var(--text2); line-height:1.6; white-space:pre-wrap; word-break:break-word; overflow:hidden; position:relative; }
+  .bubble-body.collapsed { max-height:170px; }
+  .bubble-fade { position:absolute; bottom:0; left:0; right:0; height:45px; pointer-events:none; }
+  .expand-btn { background:none; border:none; cursor:pointer; font-size:11px; padding:3px 0; margin-top:2px; opacity:0.5; transition:opacity 0.2s; }
+  .expand-btn:hover { opacity:0.8; }
+
+  .loading { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:12px; }
+  .spinner { width:30px; height:30px; border:2.5px solid rgba(16,186,218,0.12); border-top:2.5px solid var(--cyan); border-radius:50%; animation:spin 1s linear infinite; }
+  .loading-text { font-size:11px; color:var(--text3); }
+
+  .compose { border-top:1px solid var(--border2); padding:10px 16px; background:rgba(30,30,30,0.95); backdrop-filter:blur(8px); }
+  .compose-header { display:flex; align-items:center; gap:7px; margin-bottom:6px; }
+  .compose-avatar { width:26px; min-width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg,var(--cyan),var(--blue)); display:flex; align-items:center; justify-content:center; font-size:12px; border:1px solid rgba(16,186,218,0.3); }
+  .compose-name { font-weight:700; font-size:11.5px; color:var(--cyan); letter-spacing:0.04em; }
+  .compose-date { font-size:9px; color:var(--text4); }
+  .compose-subject { width:100%; background:rgba(42,42,42,0.7); border:1px solid var(--border2); border-radius:10px; padding:6px 10px; color:var(--heading); font-size:13.5px; font-weight:600; margin-bottom:5px; outline:none; font-family:'Futura PT',Futura,sans-serif; text-transform:uppercase; letter-spacing:0.04em; transition:all 0.2s; }
+  .compose-subject:focus { border-color:var(--cyan); box-shadow:0 0 0 2px rgba(16,186,218,0.12); }
+  .compose-row { display:flex; gap:6px; }
+  .compose-body { flex:1; background:rgba(42,42,42,0.7); border:1px solid var(--border2); border-radius:10px; padding:7px 10px; color:var(--text); font-size:14px; resize:vertical; outline:none; line-height:1.5; font-family:'EB Garamond',serif; transition:all 0.2s; }
+  .compose-body:focus { border-color:var(--cyan); box-shadow:0 0 0 2px rgba(16,186,218,0.12); }
+  .send-btn { border:none; border-radius:10px; padding:0 16px; font-weight:700; font-size:13px; min-width:68px; cursor:pointer; font-family:'Futura PT',Futura,sans-serif; text-transform:uppercase; letter-spacing:0.05em; transition:all 0.3s; }
+  .send-btn.active { background:linear-gradient(135deg,var(--cyan),var(--blue)); color:var(--bg); box-shadow:0 4px 15px rgba(16,186,218,0.2); }
+  .send-btn.active:hover { background:linear-gradient(135deg,var(--blue),var(--cyan)); transform:scale(1.02); box-shadow:0 6px 20px rgba(16,186,218,0.3); }
+  .send-btn.inactive { background:var(--card2); color:var(--text4); cursor:default; }
+  .compose-hint { font-size:8.5px; color:var(--text4); margin-top:4px; text-align:right; letter-spacing:0.02em; }
+
+  @media(max-width:640px) {
+    .header { padding:8px 12px; }
+    .chat { padding:8px 12px; }
+    .compose { padding:8px 12px; }
+    .bubble-row { max-width:94%; }
+    .search-input { width:80px; }
+    .header-title { font-size:13px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <img src="https://vincenzosalvia.wordpress.com/wp-content/uploads/2026/03/workspace-logo.png" alt="" class="header-logo" onerror="this.style.display='none'">
+    <div>
+      <div class="header-title title-font">VS Studio Workspace</div>
+      <div class="header-sub" id="headerSub">Caricamento...</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <input type="text" class="search-input" id="searchInput" placeholder="🔍 Cerca...">
+    <button class="btn" id="refreshBtn" onclick="doRefresh()" title="Ricarica dal Google Doc">↻</button>
+    <button class="btn" onclick="document.getElementById('topAnchor').scrollIntoView({behavior:'smooth'})" title="Vai in cima">⬆</button>
+    <button class="btn" onclick="document.getElementById('endAnchor').scrollIntoView({behavior:'smooth'})" title="Vai in fondo">⬇</button>
+  </div>
+</div>
+
+<div class="filters" id="filters"></div>
+<div class="status" id="statusBar" style="display:none"></div>
+
+<div class="chat" id="chat">
+  <div id="topAnchor"></div>
+  <div class="loading" id="loadingState">
+    <div class="spinner"></div>
+    <div class="loading-text">Caricamento Workspace dal Google Doc...</div>
+  </div>
+  <div id="endAnchor"></div>
+</div>
+
+<div class="compose">
+  <div class="compose-header">
+    <div class="compose-avatar">🎹</div>
+    <span class="compose-name title-font">Vincenzo Salvia</span>
+    <span class="compose-date" id="composeDate"></span>
+  </div>
+  <input type="text" class="compose-subject" id="subjectInput" placeholder="Oggetto (opzionale)">
+  <div class="compose-row">
+    <textarea class="compose-body" id="bodyInput" rows="2" placeholder="Scrivi un messaggio..."></textarea>
+    <button class="send-btn inactive" id="sendBtn" onclick="handleSend()">Invia ➤</button>
+  </div>
+  <div class="compose-hint">⌘+Enter per inviare • Live dal Google Doc</div>
+</div>
+
+<script>
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwmRe-xE47HZZJn6c6sPZBrUAtDgviMBNPJOEs9zk6npQRhxWyFTvFfPceo__gGPVef/exec";
+const MN = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+const ML = {gennaio:"01",febbraio:"02",marzo:"03",aprile:"04",maggio:"05",giugno:"06",luglio:"07",agosto:"08",settembre:"09",ottobre:"10",novembre:"11",dicembre:"12"};
+
+const TEAM = {
+  "VINCENZO SALVIA":{name:"Vincenzo Salvia",label:"Vincenzo",role:"Boss",color:"#10BADA",emoji:"🎹"},
+  "MARTINA GENTILE":{name:"Martina Gentile",label:"Martina",role:"Studio Manager",color:"#ff7dab",emoji:"📋"},
+  "ELEONORA GALLI":{name:"Eleonora Galli",label:"Eleonora",role:"Management",color:"#267aaa",emoji:"📊"},
+  "ALICE CYBERDIVA":{name:"Alice Cyberdiva",label:"Alice",role:"Client Assistant",color:"#5EC4B3",emoji:"🤖"},
+  "GIORGIA ESPOSITO":{name:"Giorgia Esposito",label:"Giorgia",role:"Creative Director",color:"#B88FCC",emoji:"🎨"},
+  "CHIARA PELLEGRINO":{name:"Chiara Pellegrino",label:"Chiara",role:"Press Office",color:"#D4A06B",emoji:"📰"},
+  "VITTORIA BENEDETTI":{name:"Vittoria Benedetti",label:"Vittoria",role:"Blog & Web",color:"#8FBF6B",emoji:"✍️"},
+};
+
+let rawText="", allMessages=[], currentFilter="all", sending=false;
+
+document.getElementById("composeDate").textContent = new Date().toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"});
+document.getElementById("searchInput").addEventListener("input",render);
+document.getElementById("bodyInput").addEventListener("input",function(){
+  document.getElementById("sendBtn").className = this.value.trim()?"send-btn active":"send-btn inactive";
+});
+document.addEventListener("keydown",function(e){ if(e.key==="Enter"&&(e.metaKey||e.ctrlKey))handleSend(); });
+
+function findAuthor(t){
+  const u=t.toUpperCase().trim().replace(/[*\\]/g,"");
+  for(const k of Object.keys(TEAM)) if(u.startsWith(k)||u.includes(k)) return k;
+  const m={VINCENZO:"VINCENZO SALVIA",MARTINA:"MARTINA GENTILE",ELEONORA:"ELEONORA GALLI",ALICE:"ALICE CYBERDIVA",GIORGIA:"GIORGIA ESPOSITO",CHIARA:"CHIARA PELLEGRINO",VITTORIA:"VITTORIA BENEDETTI"};
+  for(const[k,v]of Object.entries(m)) if(u.includes(k)) return v;
+  return null;
+}
+function findDate(t){
+  const m=t.match(/(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
+  return m?{display:`${m[1]} ${m[2].charAt(0).toUpperCase()+m[2].slice(1).toLowerCase()} ${m[3]}`,sort:+m[3]*10000+ +ML[m[2].toLowerCase()]*100+ +m[1]}:null;
+}
+function findSubject(lines){
+  for(let i=0;i<Math.min(lines.length,4);i++){
+    const l=lines[i].trim().replace(/^\*\*|\*\*$/g,"").replace(/^#+\s*/,"");
+    if(!l||findDate(l)||findAuthor(l)) continue;
+    if(l.length>2&&l.length<160){
+      const lt=l.replace(/[^a-zA-ZÀ-ú]/g,"");
+      const up=lt.split("").filter(c=>c===c.toUpperCase()&&c!==c.toLowerCase()).length;
+      if(lt.length>2&&up/lt.length>0.42) return{subj:l,skip:i+1};
+    }
+  }
+  return{subj:null,skip:0};
+}
+function parseDoc(raw){
+  if(!raw) return[];
+  const blocks=raw.split(/\n\s*-{3,}\s*\n/);
+  const msgs=[];
+  for(const block of blocks){
+    const t=block.trim(); if(!t||t.length<15) continue;
+    const lines=t.split("\n");
+    let author=null,date=null,hEnd=0;
+    for(let i=0;i<Math.min(5,lines.length);i++){
+      const l=lines[i].trim(); if(!l) continue;
+      if(!author){author=findAuthor(l);if(author){hEnd=i+1;date=findDate(l);}}
+      if(!date){date=findDate(l);if(date&&i>=hEnd)hEnd=i+1;}
+      if(author&&date) break;
+    }
+    if(!author) continue;
+    const c=lines.slice(hEnd);
+    const{subj,skip}=findSubject(c);
+    const body=c.slice(skip).join("\n").trim();
+    if(!body&&!subj) continue;
+    msgs.push({id:msgs.length,authorKey:author,date:date?.display||"—",sortKey:date?.sort||0,subject:subj,body});
+  }
+  return msgs;
+}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+function render(){
+  const chat=document.getElementById("chat");
+  const q=document.getElementById("searchInput").value.toLowerCase();
+  let msgs=allMessages;
+  if(currentFilter!=="all") msgs=msgs.filter(m=>m.authorKey===currentFilter);
+  if(q) msgs=msgs.filter(m=>(m.subject||"").toLowerCase().includes(q)||(m.body||"").toLowerCase().includes(q));
+
+  let html='<div id="topAnchor"></div>';
+  let prev=null;
+  for(const msg of msgs){
+    const m=TEAM[msg.authorKey]||{name:msg.authorKey,color:"#888",emoji:"❓",role:""};
+    const isV=msg.authorKey==="VINCENZO SALVIA";
+    const side=isV?"vincenzo":"other";
+    const bg=isV?"var(--vincenzo-bg)":"var(--other-bg)";
+    const long=msg.body?.length>500;
+    const uid="m"+msg.id;
+
+    if(msg.date!==prev){
+      html+=`<div class="date-sep"><span class="date-label">${esc(msg.date)}</span></div>`;
+      prev=msg.date;
+    }
+    html+=`<div class="bubble-row ${side}">`;
+    html+=`<div class="avatar" style="background:linear-gradient(145deg,${m.color}BB,${m.color}44);box-shadow:0 2px 8px ${m.color}20;border:1px solid ${m.color}25">${m.emoji}</div>`;
+    html+=`<div class="bubble ${side}">`;
+    html+=`<div class="bubble-header">`;
+    html+=`<span class="bubble-name title-font" style="color:${m.color}">${esc(m.name)}</span>`;
+    html+=`<span class="bubble-role">${esc(m.role)}</span>`;
+    html+=`<span class="bubble-date">${esc(msg.date)}</span>`;
+    html+=`</div>`;
+    if(msg.subject) html+=`<div class="bubble-subject" style="background:${m.color}0A;border-left:3px solid ${m.color}30">${esc(msg.subject)}</div>`;
+    html+=`<div class="bubble-body${long?' collapsed':''}" id="${uid}">${esc(msg.body)}`;
+    if(long) html+=`<div class="bubble-fade" style="background:linear-gradient(transparent,${bg})"></div>`;
+    html+=`</div>`;
+    if(long) html+=`<button class="expand-btn" style="color:${m.color}" onclick="toggleMsg('${uid}','${bg}',this)">▼ leggi tutto</button>`;
+    html+=`</div></div>`;
+  }
+  html+='<div id="endAnchor"></div>';
+  chat.innerHTML=html;
+  document.getElementById("headerSub").textContent=`${allMessages.length} messaggi`;
+  renderFilters();
+}
+
+function toggleMsg(uid,bg,btn){
+  const el=document.getElementById(uid);
+  if(el.classList.contains("collapsed")){
+    el.classList.remove("collapsed");
+    const fade=el.querySelector(".bubble-fade"); if(fade) fade.remove();
+    btn.textContent="▲ comprimi";
+  } else {
+    el.classList.add("collapsed");
+    const d=document.createElement("div"); d.className="bubble-fade"; d.style.background=`linear-gradient(transparent,${bg})`;
+    el.appendChild(d);
+    btn.textContent="▼ leggi tutto";
+  }
+}
+
+function renderFilters(){
+  const f=document.getElementById("filters");
+  const counts={all:allMessages.length};
+  for(const k of Object.keys(TEAM)) counts[k]=allMessages.filter(m=>m.authorKey===k).length;
+  const items=[{key:"all",label:"Tutti",color:"var(--cyan)"},...Object.entries(TEAM).map(([k,v])=>({key:k,label:v.label,emoji:v.emoji,color:v.color}))];
+  let html="";
+  for(const item of items){
+    const active=currentFilter===item.key;
+    html+=`<button class="filter-btn title-font${active?' active':''}" style="background:${active?item.color+'12':'transparent'};border-color:${active?item.color+'30':'rgba(16,16,20,0.8)'};color:${active?item.color:'var(--text3)'}" onclick="setFilter('${item.key}')">`;
+    if(item.emoji) html+=`<span style="margin-right:2px">${item.emoji}</span>`;
+    html+=`${item.label}<span class="filter-count">${counts[item.key]||0}</span></button>`;
+  }
+  f.innerHTML=html;
+}
+
+function setFilter(key){currentFilter=key;render();}
+
+function showStatus(type,text){
+  const bar=document.getElementById("statusBar");
+  bar.className="status "+type; bar.textContent=text; bar.style.display="block";
+  setTimeout(()=>{bar.style.display="none";},3000);
+}
+
+async function fetchDoc(){
+  try{
+    const res=await fetch(GAS_URL,{redirect:"follow"});
+    if(!res.ok) throw new Error(res.status);
+    const text=await res.text();
+    if(text.length>500){
+      rawText=text; allMessages=parseDoc(text);
+      try{localStorage.setItem("ws-cache",text);}catch(e){}
+      return true;
+    }
+  }catch(e){console.error("Fetch error:",e);}
+  return false;
+}
+
+async function doRefresh(){
+  const btn=document.getElementById("refreshBtn");
+  btn.classList.add("spinning");
+  const ok=await fetchDoc();
+  btn.classList.remove("spinning");
+  if(ok){render();showStatus("refreshed","✓ Aggiornato dal Google Doc");scrollToBottom();}
+  else showStatus("error","✗ Errore nel caricamento");
+}
+
+async function handleSend(){
+  const bodyEl=document.getElementById("bodyInput");
+  const subjEl=document.getElementById("subjectInput");
+  if(!bodyEl.value.trim()||sending) return;
+  sending=true;
+  const btn=document.getElementById("sendBtn");
+  btn.textContent="...";
+
+  const d=new Date();
+  let text=`VINCENZO SALVIA - ${d.getDate()} ${MN[d.getMonth()]} ${d.getFullYear()}`;
+  if(subjEl.value.trim()) text+=`\n${subjEl.value.trim().toUpperCase()}`;
+  text+=`\n\n${bodyEl.value.trim()}`;
+
+  try{
+    const res=await fetch(GAS_URL,{
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify({text:text}),
+      redirect:"follow"
+    });
+    const result=await res.json();
+    if(result.status==="ok"){
+      // Add locally
+      rawText+=`\n\n----------\n\n${text}`;
+      allMessages=parseDoc(rawText);
+      try{localStorage.setItem("ws-cache",rawText);}catch(e){}
+      subjEl.value=""; bodyEl.value="";
+      btn.className="send-btn inactive";
+      render();
+      showStatus("sent","✓ Aggiunto al Workspace");
+      setTimeout(scrollToBottom,200);
+    } else { throw new Error(result.message||"unknown"); }
+  }catch(e){console.error(e);showStatus("error","✗ Errore nell'invio");}
+  finally{sending=false;btn.textContent="Invia ➤";}
+}
+
+function scrollToBottom(){
+  setTimeout(()=>{document.getElementById("endAnchor")?.scrollIntoView({behavior:"smooth"});},100);
+}
+
+// INIT
+(async function(){
+  try{
+    const cached=localStorage.getItem("ws-cache");
+    if(cached?.length>500){
+      rawText=cached; allMessages=parseDoc(cached);
+      document.getElementById("loadingState").style.display="none";
+      render(); scrollToBottom();
+    }
+  }catch(e){}
+
+  const ok=await fetchDoc();
+  document.getElementById("loadingState").style.display="none";
+  if(ok){render();scrollToBottom();}
+  else if(!allMessages.length){
+    document.getElementById("chat").innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;text-align:center"><div style="font-size:32px">📋</div><div style="font-size:13px;color:var(--text3)">Errore nel caricamento. Clicca ↻ per riprovare.</div></div>';
+  }
+})();
+</script>
+</body>
+</html>
